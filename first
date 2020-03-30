@@ -1,0 +1,132 @@
+import React from "react";
+
+export class Calendar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedCalendarOption: ""
+    };
+  }
+
+  parseDateObj = dateStr => {
+    if (dateStr) {
+      const splittedTS = dateStr.split(" ");
+      const d = splittedTS[0].split("-");
+      const t = splittedTS[1].split(":");
+      const date = new Date(d[0], d[1] - 1, d[2], t[0], t[1], t[2]);
+      return date;
+    }
+    return "";
+  };
+
+  getFormattedDate = date => {
+    if (date) {
+      return date
+        .replace(/-/g, "")
+        .replace(" ", "T")
+        .replace(/:/g, "");
+    }
+
+    return "";
+  };
+
+  getFormattedCalendarName = name => name.toLowerCase().replace(/ /g, "-");
+
+  getStartDate = () => {
+    return this.getFormattedDate("2020-31-03 11:22:11");
+  };
+
+  getEndDate = () => {
+    return this.getFormattedDate("2020-01-04 11:22:11");
+  };
+
+  getLocation = () => {
+    return "JAmshedpur";
+  };
+
+  getSubject = () => {
+    return "Testing files";
+  };
+
+  getCalendarName = () => {
+    return "Calendar Name";
+  };
+
+  getDescription = () => {
+    let breakLine = "\\n";
+    let departureAirportCodeBracket = `FOH`;
+    let arrivalAirportCodeBracket = `(FPS)`;
+
+    if (window.innerWidth <= 800) {
+      departureAirportCodeBracket = ` - FOH`;
+      arrivalAirportCodeBracket = ` - FPS`;
+    }
+    const departure_city = "Jamshedpur";
+    const airline_name = "Indigo";
+    const airline_number = "1234";
+    const arrival_time = "2020:04:03 12:22:33";
+    const arrivalAirlineNumber = "1234";
+    const arrival_city = "Ranchi";
+    const arrivalAirlineName = "Air Asia";
+
+    return `Departure : ${breakLine}${breakLine} ${this.getReadableDate(
+      "2020-12-11 12:11:33"
+    )}${breakLine} ${departure_city} ${departureAirportCodeBracket} ${breakLine} ${airline_name} ${airline_number} ${breakLine}${breakLine} Arrival : ${breakLine}${breakLine} ${this.getReadableDate(
+      arrival_time
+    )}${breakLine} ${arrival_city} ${arrivalAirportCodeBracket} ${breakLine} ${arrivalAirlineName} ${arrivalAirlineNumber}`;
+  };
+
+  getReadableDate = date => {
+    if (date) {
+      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+      ];
+
+      const targetDate = this.parseDateObj(date);
+      const targetMin =
+        targetDate.getMinutes() < 10
+          ? `0${targetDate.getMinutes()}`
+          : targetDate.getMinutes();
+      const monthName = months[targetDate.getMonth()];
+      return `${targetDate.getHours()}:${targetMin} ${
+        days[targetDate.getDay()]
+      }, ${monthName} ${targetDate.getDate()}, ${targetDate.getFullYear()}`;
+    }
+    return "";
+  };
+
+  generateIcs = () => {
+    const icsMSG = `BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\nX-PUBLISHED-TTL:PT1H\nPRODID:amex\nBEGIN:VEVENT\nDTSTART:${this.getStartDate()}\nDTEND:${this.getEndDate()}\nSUMMARY:${this.getSubject()}\nDESCRIPTION:${this.getDescription()}\nLOCATION:${this.getLocation()}\nEND:VEVENT\nEND:VCALENDAR`;
+    const uri = `data:text/calendar;charset=utf8, ${encodeURI(icsMSG)}`;
+    const link = document.createElement("a");
+    link.href = uri;
+    link.style = "display:none";
+    link.download = `${this.getCalendarName()}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  handleCalendar = () => {
+    this.generateIcs();
+  };
+
+  render() {
+    return <button onClick={this.handleCalendar}>Continue</button>;
+  }
+}
+
+export default Calendar;
